@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+        .box {
+            width: 200px;
+            height: 200px;
+            background: red;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        #box2 {
+            top: 300px;
+            background: blue;
+        }
+    </style>
+    <script>
+
+        var Drag = function (element){
+            this.element = element;
+            this.disX = null;
+            this.disY = null;
+            this.init();
+        }
+
+        Drag.prototype.init = function (){
+            // this->obj
+            var _this = this;
+            this.element.onmousedown = function (ev){
+                _this.downFn(ev);
+            }
+        }
+
+        Drag.prototype.downFn = function (ev){
+            // this->obj
+            var _this = this;
+            this.disX = ev.clientX - this.element.offsetLeft;
+            this.disY = ev.clientY - this.element.offsetTop;
+            document.onmousemove = function (ev){
+                _this.moveFn(ev);
+            }
+            document.onmouseup = function (){
+                _this.upFn();
+            }
+            ev.preventDefault();
+        }   
+
+        Drag.prototype.moveFn = function (ev){
+            // this->obj
+            var l = ev.clientX - this.disX;
+            var t = ev.clientY - this.disY;
+            this.element.style.left = l + "px";
+            this.element.style.top = t + "px";
+        }
+
+        Drag.prototype.upFn = function (){
+            document.onmousemove = document.onmouseup = null;
+        }
+
+        var DragRange = function (element){
+            Drag.call(this,element);
+        }
+
+        for( var attr in Drag.prototype ){
+            if( Drag.prototype.hasOwnProperty(attr) ){
+                DragRange.prototype[attr] = Drag.prototype[attr];
+            }
+        }
+
+        DragRange.prototype.moveFn = function (ev){
+            var l = ev.clientX - this.disX;
+            var t = ev.clientY - this.disY;
+
+            if( l < 0 ){
+                l = 0;
+            } else if( l > document.documentElement.clientWidth - this.element.offsetWidth){
+                l = document.documentElement.clientWidth - this.element.offsetWidth
+            }
+
+            if( t < 0 ){
+                t = 0;
+            } else if( t > document.documentElement.clientHeight - this.element.offsetHeight){
+                t = document.documentElement.clientHeight - this.element.offsetHeight
+            }
+
+            this.element.style.left = l + "px";
+            this.element.style.top = t + "px";
+        }
+
+
+        window.onload = function (){
+
+            var box1 = document.getElementById("box1");
+            var box2 = document.getElementById("box2");
+
+            new Drag(box1);
+            new DragRange(box2);
+
+        }
+    </script>
+</head>
+<body>
+    <div id="box1" class="box"></div>
+    <div id="box2" class="box"></div>
+</body>
+</html>
+    
